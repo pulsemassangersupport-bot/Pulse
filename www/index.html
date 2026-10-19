@@ -1110,7 +1110,7 @@ button.item{appearance:none;-webkit-appearance:none}
     <div class="friend-card">
       <div class="av" id="friendAv">?</div>
       <div style="color:var(--text);font-size:18px;font-weight:600" id="friendName">—</div>
-      <div style="color:var(--text2);margin:4px 0" id="friendUser">@—</div>
+      <div style="color:var(--text2);margin:4px 0" id="friendUserLabel">@—</div>
       <div style="font-size:13px;color:var(--text2)" id="friendDays"></div>
     </div>
     <div class="sheet-btns"><button class="no" id="friendClose" type="button" style="flex:1">Закрыть</button></div>
@@ -4743,7 +4743,7 @@ document.getElementById('cvName').onclick=function(){
   var u=activeUser;
   document.getElementById('friendAv').textContent=letterAv(u);
   document.getElementById('friendName').textContent=formatPeerName(u);
-  document.getElementById('friendUser').textContent='@'+u;
+  document.getElementById('friendUserLabel').textContent='@'+u;
   var days=1;
   if(chats[u]&&chats[u].firstAt) days=Math.max(1, Math.floor((Date.now()-chats[u].firstAt)/86400000));
   else if(chats[u]){ chats[u].firstAt=Date.now(); }

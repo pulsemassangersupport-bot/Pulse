@@ -1921,6 +1921,9 @@ function connectTo(friend){
   if(!peer){ alert('Сеть ещё не готова. Подожди пару секунд.'); return; }
   if(!peer.open){ alert('Нет связи с сервером. Проверь интернет и зайди снова.'); return; }
   if(connections[friend]&&connections[friend].open){ openChat(friend); return; }
+  window.__conn=window.__conn||{};
+  if(window.__conn[friend]) return;
+  window.__conn[friend]=true;
   try{
     if(!chats[friend]) chats[friend]={name:friend,msgs:[],last:'',time:''};
     openChat(friend);
@@ -1934,6 +1937,7 @@ function connectTo(friend){
       }
     }, 5000);
   }catch(e){ alert('Ошибка: '+(e.message||e)); }
+  finally{ window.__conn[friend]=false; }
 }
 
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }

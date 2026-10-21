@@ -5419,5 +5419,37 @@ if(window.markTab){
   };
 })();
 </script>
+
+<script>
+(function(){
+  var C=window.Capacitor;
+  if(!(C&&C.isNativePlatform&&C.isNativePlatform())) return;
+  /* inside the APK the browser Notification API does not exist: use the system push permission instead */
+  window.notify=function(){};
+  var PN=C.registerPlugin('PushNotifications');
+  var tg=document.getElementById('togNotif');
+  function ui(){ try{ applySettings(); }catch(e){} }
+  if(tg){
+    tg.onchange=function(){
+      var el=this;
+      if(el.checked){
+        PN.requestPermissions().then(function(r){
+          var ok=!!(r&&r.receive==='granted');
+          settings.notif=ok; el.checked=ok; saveSettings(); ui();
+          if(ok){ try{ PN.register(); }catch(e){} }
+          else alert('Уведомления выключены в телефоне. Открой: Настройки → Приложения → Pulse → Уведомления и включи.');
+        }).catch(function(){ el.checked=false; alert('Не удалось включить уведомления'); });
+      } else { settings.notif=false; saveSettings(); ui(); }
+    };
+  }
+  /* reflect the real permission on start */
+  setTimeout(function(){
+    PN.checkPermissions().then(function(r){
+      var ok=!!(r&&r.receive==='granted');
+      if(ok!==!!settings.notif){ settings.notif=ok; saveSettings(); ui(); }
+    }).catch(function(){});
+  },1500);
+})();
+</script>
 </body>
 </html>

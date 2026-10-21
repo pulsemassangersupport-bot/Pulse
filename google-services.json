@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "22285334813",
+    "firebase_url": "https://pulse-2f757-default-rtdb.firebaseio.com",
+    "project_id": "pulse-2f757",
+    "storage_bucket": "pulse-2f757.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:22285334813:android:9ad41ec6268695edac49f4",
+        "android_client_info": {
+          "package_name": "com.pulse.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALpyTVHh0yXu-PML9CTJFok9mLwmrVgEk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

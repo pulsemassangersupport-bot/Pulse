@@ -5451,5 +5451,12 @@ if(window.markTab){
   },1500);
 })();
 </script>
+
+<style>
+/* bottom nav: solid glass + fade so page text never shows through */
+.nav{background:rgba(20,28,42,.97)!important;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.09)!important;box-shadow:0 12px 32px rgba(0,0,0,.6)!important}
+.content::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(to top,var(--bg) 45%,transparent);pointer-events:none;z-index:4}
+.page{padding-bottom:140px!important}
+</style>
 </body>
 </html>

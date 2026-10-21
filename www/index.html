@@ -5177,14 +5177,22 @@ if(window.markTab){
 </script>
 
 <style>
-#vcOv{position:fixed;inset:0;z-index:99998;background:#05070d;display:none;flex-direction:column;align-items:center;justify-content:space-between;color:#fff}
+#vcOv{position:fixed;inset:0;z-index:99998;background:radial-gradient(520px 380px at 50% 16%,rgba(139,124,248,.42),transparent 65%),radial-gradient(480px 340px at 90% 100%,rgba(56,189,248,.26),transparent 60%),linear-gradient(180deg,#0b1030,#05070d);display:none;flex-direction:column;align-items:center;justify-content:space-between;color:#fff}
 #vcOv.on{display:flex}
-#vcRemote{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#05070d}
+#vcRemote{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:transparent}
 #vcLocal{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;width:96px;height:128px;object-fit:cover;border-radius:16px;border:2px solid rgba(255,255,255,.25);background:#111;z-index:2;display:none}
 #vcOv.vid #vcLocal{display:block}
 .vc-top{position:relative;z-index:2;text-align:center;padding-top:calc(60px + env(safe-area-inset-top,0px));text-shadow:0 2px 10px rgba(0,0,0,.6)}
 .vc-av{width:110px;height:110px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,#38bdf8,#8b7cf8);display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:700}
-#vcOv.vid .vc-av{display:none}
+#vcOv.flow .vc-av,#vcOv.flow .vc-wave,#vcOv.flow .vc-brand{display:none}
+.vc-av{position:relative}
+.vc-av::before,.vc-av::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid rgba(139,124,248,.7);animation:vcr 2.4s ease-out infinite}
+.vc-av::after{animation-delay:1.2s}
+@keyframes vcr{from{transform:scale(1);opacity:.8}to{transform:scale(1.9);opacity:0}}
+.vc-brand{font-size:13px;font-weight:700;letter-spacing:6px;opacity:.7;margin-bottom:28px}
+.vc-wave{position:absolute;left:0;right:0;top:50%;width:100%;height:120px;opacity:.55;z-index:1}
+.vc-wave path{stroke-dasharray:620;animation:vcw 2.6s linear infinite}
+@keyframes vcw{from{stroke-dashoffset:620}to{stroke-dashoffset:-620}}
 #vcName{font-size:24px;font-weight:700}#vcState{font-size:15px;opacity:.8;margin-top:6px}
 .vc-btns{position:relative;z-index:2;display:flex;gap:22px;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
 .vc-btns button{width:62px;height:62px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:24px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -5197,37 +5205,56 @@ if(window.markTab){
   /* ===== 0) settings ===== */
   var FB_URL='https://pulse-2f757-default-rtdb.firebaseio.com';   // Firebase Realtime Database URL, e.g. https://xxxx-default-rtdb.firebaseio.com
   /* ===== 1) ICE servers (STUN + TURN) so calls work over mobile data ===== */
-  var ICE=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},
+  var ICE=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'},
+    {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'},
+    {urls:'turn:turn.anyfirewall.com:443?transport=tcp',username:'webrtc',credential:'webrtc'},
+    {urls:'turn:freestun.net:3478',username:'free',credential:'free'},
     {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
     {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},
     {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}];
   var _P=window.Peer;
-  if(_P && !_P.__w){ var W=function(id,o){ o=o||{}; o.config={iceServers:ICE}; return new _P(id,o); }; W.__w=1; W.prototype=_P.prototype; window.Peer=W; }
+  if(_P && !_P.__w){ var W=function(id,o){ o=o||{}; o.config={iceServers:ICE,sdpSemantics:'unified-plan'}; return new _P(id,o); }; W.__w=1; W.prototype=_P.prototype; window.Peer=W; }
 
   /* ===== 2) calls: audio + video with real playback ===== */
-  document.body.insertAdjacentHTML('beforeend','<div id="vcOv"><video id="vcRemote" autoplay playsinline></video><video id="vcLocal" autoplay playsinline muted></video><div class="vc-top"><div class="vc-av" id="vcAv">?</div><div id="vcName"></div><div id="vcState"></div></div><div class="vc-btns"><button id="vcMic" type="button">🎤</button><button id="vcCam" type="button">📷</button><button id="vcHang" type="button">✆</button></div></div>');
+  document.body.insertAdjacentHTML('beforeend','<div id="vcOv"><video id="vcRemote" autoplay playsinline></video><video id="vcLocal" autoplay playsinline muted></video><svg class="vc-wave" viewBox="0 0 400 120" preserveAspectRatio="none"><defs><linearGradient id="vcg" x1="0" x2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity="0"/><stop offset=".5" stop-color="#8b7cf8"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0"/></linearGradient></defs><path d="M0 60H110L125 45L145 85L170 12L195 108L215 60H400" fill="none" stroke="url(#vcg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="vc-top"><div class="vc-brand">PULSE</div><div class="vc-av" id="vcAv">?</div><div id="vcName"></div><div id="vcState"></div></div><div class="vc-btns"><button id="vcMic" type="button">🎤</button><button id="vcCam" type="button">📷</button><button id="vcHang" type="button">✆</button></div></div>');
   var ov=document.getElementById('vcOv'), vr=document.getElementById('vcRemote'), vl=document.getElementById('vcLocal');
   var CS={call:null,local:null,timer:null,tick:null,t0:0,answered:false};
   function st(t){ document.getElementById('vcState').textContent=t; }
-  function show(who,state,video){ document.getElementById('vcName').textContent='@'+who; document.getElementById('vcAv').textContent=(who||'?').charAt(0).toUpperCase(); st(state); ov.classList.toggle('vid',!!video); ov.classList.add('on'); document.getElementById('vcMic').classList.remove('off'); document.getElementById('vcCam').classList.remove('off'); }
+  function show(who,state,video){ document.getElementById('vcName').textContent='@'+who; document.getElementById('vcAv').textContent=(who||'?').charAt(0).toUpperCase(); st(state); ov.classList.remove('flow'); ov.classList.toggle('vid',!!video); ov.classList.add('on'); document.getElementById('vcMic').classList.remove('off'); document.getElementById('vcCam').classList.remove('off'); }
   function hang(){
     try{ if(CS.call) CS.call.close(); }catch(e){}
     try{ if(CS.local) CS.local.getTracks().forEach(function(t){ t.stop(); }); }catch(e){}
     clearTimeout(CS.timer); clearInterval(CS.tick);
     CS.call=null; CS.local=null; CS.answered=false;
-    vr.srcObject=null; vl.srcObject=null; ov.classList.remove('on','vid');
+    vr.srcObject=null; vl.srcObject=null; ov.classList.remove('on','vid','flow');
   }
   window.endCall=hang;
+  function setRemote(rs){ if(vr.srcObject===rs) return; vr.srcObject=rs; var p=vr.play(); if(p&&p.catch) p.catch(function(){ st('Нажми на экран, чтобы включить звук'); }); }
+  function connected(){
+    if(CS.answered) return; CS.answered=true; clearTimeout(CS.timer);
+    CS.t0=Date.now(); clearInterval(CS.tick);
+    CS.tick=setInterval(function(){ var s=Math.floor((Date.now()-CS.t0)/1000); st(('0'+Math.floor(s/60)).slice(-2)+':'+('0'+s%60).slice(-2)); },1000);
+  }
   function attach(call){
-    call.on('stream',function(rs){
-      CS.answered=true; clearTimeout(CS.timer);
-      vr.srcObject=rs; var p=vr.play(); if(p&&p.catch) p.catch(function(){ st('Нажми на экран, чтобы включить звук'); });
-      CS.t0=Date.now(); clearInterval(CS.tick);
-      CS.tick=setInterval(function(){ var s=Math.floor((Date.now()-CS.t0)/1000); st(('0'+Math.floor(s/60)).slice(-2)+':'+('0'+s%60).slice(-2)); },1000);
-    });
+    var n=0, dis=0;
+    call.on('stream',function(rs){ setRemote(rs); if(!call.peerConnection) connected(); });
     call.on('close',hang);
     call.on('error',function(){ st('Ошибка соединения'); setTimeout(hang,1500); });
+    var iv=setInterval(function(){
+      if(CS.call!==call){ clearInterval(iv); return; }
+      n++;
+      try{ if(call.remoteStream&&!vr.srcObject) setRemote(call.remoteStream); }catch(e){}
+      var pc=call.peerConnection;
+      if(pc){
+        var s=pc.iceConnectionState;
+        if(s==='connected'||s==='completed'){ dis=0; connected(); }
+        else if(s==='failed'){ clearInterval(iv); st('Не удалось соединиться'); setTimeout(hang,2200); return; }
+        else if(s==='disconnected'&&++dis>20){ clearInterval(iv); st('Связь потеряна'); setTimeout(hang,1500); return; }
+      }
+      if(!CS.answered&&n>75){ clearInterval(iv); st('Не удалось соединиться'); setTimeout(hang,2200); }
+    },400);
   }
+  vr.addEventListener('playing',function(){ try{ if(vr.srcObject&&vr.srcObject.getVideoTracks().length) ov.classList.add('flow'); }catch(e){} });
   ov.addEventListener('click',function(){ try{ vr.play(); }catch(e){} });
   document.getElementById('vcHang').onclick=function(e){ e.stopPropagation(); hang(); };
   document.getElementById('vcMic').onclick=function(e){ e.stopPropagation(); if(!CS.local) return; var t=CS.local.getAudioTracks()[0]; if(t){ t.enabled=!t.enabled; this.classList.toggle('off',!t.enabled); } };
@@ -5270,13 +5297,23 @@ if(window.markTab){
   var swallow=false, _add=addSys;
   window.addSys=function(u,t){ if(swallow&&t&&String(t).indexOf('Не доставлено')===0) return; return _add(u,t); };
   var _sp=sendPayload;
+  function toMailbox(to,payload,cb){
+    return fetch(url('/inbox/'+encodeURIComponent(to)),{method:'POST',body:JSON.stringify({from:me(),text:payload.text||'',kind:payload.kind||'text',data:payload.data||null,name:payload.name||null,ts:Date.now()})})
+      .then(function(r){ if(!r.ok) throw 0; return true; });
+  }
   sendPayload=function(payload){
-    var to=activeUser, conn=to&&connections[to];
-    var off=to&&to!=='pulse_ai'&&to!=='saved_messages'&&!(conn&&conn.open)&&payload&&((payload.text||'').trim()||payload.data);
-    if(!off) return _sp(payload);
+    var to=activeUser, conn=to&&connections[to], open=!!(conn&&conn.open);
+    var isText=((payload&&payload.kind)||'text')==='text';
+    var ok=to&&to!=='pulse_ai'&&to!=='saved_messages'&&payload&&((payload.text||'').trim()||payload.data);
+    if(!ok||(open&&!isText)) return _sp(payload);
+    if(open){
+      /* connection may be stale: send directly AND keep a copy in the mailbox (receiver removes duplicates) */
+      _sp(payload);
+      toMailbox(to,payload).catch(function(){});
+      return;
+    }
     swallow=true; try{ _sp(payload); }finally{ swallow=false; }
-    fetch(url('/inbox/'+encodeURIComponent(to)),{method:'POST',body:JSON.stringify({from:me(),text:payload.text||'',kind:payload.kind||'text',data:payload.data||null,name:payload.name||null,ts:Date.now()})})
-    .then(function(r){ if(!r.ok) throw 0;
+    toMailbox(to,payload).then(function(){
       settings.offlineQueue=(settings.offlineQueue||[]).filter(function(i){ return i.payload!==payload; }); saveSettings();
       _add(to,'Отправлено — друг получит, когда зайдёт');
     }).catch(function(){ _add(to,'Не удалось отправить — нет интернета'); });
@@ -5287,6 +5324,14 @@ if(window.markTab){
     var ww=settings.whoWrite||'all'; if(ww==='nobody'||(ww==='contacts'&&!chats[f])) return;
     if(!chats[f]) chats[f]={name:f,msgs:[],last:'',time:''};
     var tm=new Date(m.ts||Date.now()).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
+    if((m.kind||'text')==='text'){
+      var tm2=new Date((m.ts||Date.now())+60000).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
+      var arr=chats[f].msgs;
+      for(var i=arr.length-1,c=0;i>=0&&c<12;i--,c++){
+        var x=arr[i];
+        if(x&&!x.sys&&!x.out&&!x.__dup&&(x.kind||'text')==='text'&&x.t===(m.text||'')&&(x.tm===tm||x.tm===tm2)){ x.__dup=1; saveChats(); return; }
+      }
+    }
     var msg={t:m.text||'',out:false,tm:tm,kind:m.kind||'text',data:m.data||undefined,name:m.name||undefined};
     chats[f].msgs.push(msg); chats[f].last=msgPreview(msg); chats[f].time=tm;
     if(activeUser===f) appendBubble(msg.t,false,tm,msg);
@@ -5297,7 +5342,7 @@ if(window.markTab){
     var names=[]; [settings.username,myUsername].forEach(function(n){ if(n&&names.indexOf(n)<0) names.push(n); });
     names.forEach(function(n){
       fetch(url('/inbox/'+encodeURIComponent(n))).then(function(r){ return r.json(); }).then(function(box){
-        if(!box) return;
+        if(!box||box.error) return;
         Object.keys(box).forEach(function(k){
           if(!DONE[k]){ DONE[k]=Date.now(); try{ deliver(box[k]); }catch(e){} }
           fetch(url('/inbox/'+encodeURIComponent(n)+'/'+k),{method:'DELETE'}).catch(function(){});
@@ -5309,6 +5354,69 @@ if(window.markTab){
   }
   setInterval(function(){ if(myUsername) poll(); },4000);
   document.addEventListener('visibilitychange',function(){ if(!document.hidden&&myUsername) poll(); });
+})();
+</script>
+
+<style>
+.chat-item,.chat-item *,.ctx-menu,.ctx-menu *,.bubble{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.ctx-menu{border-radius:16px!important;padding:6px!important;min-width:210px;max-height:72vh;overflow-y:auto;box-shadow:0 14px 40px rgba(0,0,0,.55)!important}
+.ctx-menu button{border-radius:11px;padding:13px 14px!important;font-size:15.5px}
+.ctx-menu button+button{margin-top:1px}
+</style>
+<script>
+(function(){
+  var _s=showCtx;
+  showCtx=function(e,meta,mode){
+    _s(e,meta,mode);
+    var m=document.getElementById('ctxMenu'); if(!m) return;
+    var x=(e&&(e.clientX||(e.touches&&e.touches[0]&&e.touches[0].clientX)))||80;
+    var y=(e&&(e.clientY||(e.touches&&e.touches[0]&&e.touches[0].clientY)))||120;
+    try{ var sel=window.getSelection&&window.getSelection(); if(sel&&sel.removeAllRanges) sel.removeAllRanges(); }catch(er){}
+    requestAnimationFrame(function(){
+      var h=m.offsetHeight, w=m.offsetWidth, pad=10;
+      m.style.top=Math.max(pad,Math.min(y,window.innerHeight-h-pad))+'px';
+      m.style.left=Math.max(pad,Math.min(x,window.innerWidth-w-pad))+'px';
+    });
+  };
+})();
+</script>
+
+<script>
+(function(){
+  var PUSH_URL='';   // Cloudflare Worker URL (fill in after the worker is deployed)
+  var DB='https://pulse-2f757-default-rtdb.firebaseio.com';
+  function names(){ var a=[]; [settings.username,myUsername].forEach(function(n){ if(n&&a.indexOf(n)<0) a.push(n); }); return a; }
+  /* 1) register this phone for push and keep its token in the database */
+  try{
+    var C=window.Capacitor;
+    if(C&&C.isNativePlatform&&C.isNativePlatform()){
+      var PN=C.registerPlugin('PushNotifications'), started=false, tok=localStorage.getItem('pulse_push_token')||'';
+      function save(){ if(!tok) return; names().forEach(function(n){ fetch(DB+'/tokens/'+encodeURIComponent(n)+'.json',{method:'PUT',body:JSON.stringify(tok)}).catch(function(){}); }); }
+      function start(){
+        started=true;
+        PN.addListener('registration',function(t){ tok=t.value; localStorage.setItem('pulse_push_token',tok); save(); });
+        PN.addListener('registrationError',function(e){ console.log('push error',e); });
+        PN.requestPermissions().then(function(r){ if(r&&r.receive==='granted') PN.register(); }).catch(function(e){ console.log(e); });
+      }
+      setInterval(function(){ if(myUsername&&!started) start(); },3000);
+      setInterval(save,300000);
+    }
+  }catch(e){ console.log(e); }
+  /* 2) after sending, ask the worker to wake the friend's phone */
+  var _sp=sendPayload;
+  sendPayload=function(payload){
+    var to=activeUser, r=_sp(payload);
+    try{
+      if(PUSH_URL&&to&&to!=='pulse_ai'&&to!=='saved_messages'&&payload){
+        var k=payload.kind||'text', txt=(payload.text||'').trim();
+        if(k!=='text'||txt){
+          var body=k==='text'?txt:({image:'📷 Фото',video:'🎬 Видео',audio:'🎤 Голосовое',file:'📎 Файл',sticker:txt||'Стикер'}[k]||'Сообщение');
+          fetch(PUSH_URL,{method:'POST',body:JSON.stringify({to:to,from:settings.username||myUsername,text:body})}).catch(function(){});
+        }
+      }
+    }catch(e){}
+    return r;
+  };
 })();
 </script>
 </body>

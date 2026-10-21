@@ -5429,19 +5429,19 @@ if(window.markTab){
   var PN=C.registerPlugin('PushNotifications');
   var tg=document.getElementById('togNotif');
   function ui(){ try{ applySettings(); }catch(e){} }
-  if(tg){
-    tg.onchange=function(){
-      var el=this;
-      if(el.checked){
-        PN.requestPermissions().then(function(r){
-          var ok=!!(r&&r.receive==='granted');
-          settings.notif=ok; el.checked=ok; saveSettings(); ui();
-          if(ok){ try{ PN.register(); }catch(e){} }
-          else alert('Уведомления выключены в телефоне. Открой: Настройки → Приложения → Pulse → Уведомления и включи.');
-        }).catch(function(){ el.checked=false; alert('Не удалось включить уведомления'); });
-      } else { settings.notif=false; saveSettings(); ui(); }
-    };
+  function h(e){
+    e.stopImmediatePropagation();
+    var el=e.target;
+    if(el.checked){
+      PN.requestPermissions().then(function(r){
+        var ok=!!(r&&r.receive==='granted');
+        settings.notif=ok; el.checked=ok; saveSettings(); ui();
+        if(ok){ try{ PN.register(); }catch(er){} }
+        else alert('Уведомления выключены в телефоне. Открой: Настройки → Приложения → Pulse → Уведомления и включи.');
+      }).catch(function(er){ el.checked=false; alert('Не удалось включить уведомления: '+(er&&er.message?er.message:er)); });
+    } else { settings.notif=false; saveSettings(); ui(); }
   }
+  if(tg){ tg.addEventListener('change',h,true); }
   /* reflect the real permission on start */
   setTimeout(function(){
     PN.checkPermissions().then(function(r){
@@ -5453,10 +5453,14 @@ if(window.markTab){
 </script>
 
 <style>
-/* bottom nav: solid glass + fade so page text never shows through */
-.nav{background:rgba(20,28,42,.97)!important;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.09)!important;box-shadow:0 12px 32px rgba(0,0,0,.6)!important}
-.content::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(to top,var(--bg) 45%,transparent);pointer-events:none;z-index:4}
 .page{padding-bottom:140px!important}
+</style>
+<style>
+.nav{position:absolute!important;left:0!important;right:0!important;bottom:0!important;transform:none!important;width:auto!important;display:flex!important;justify-content:center!important;align-items:center!important;padding:0 0 calc(12px + var(--safe))!important;background:transparent!important;border:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-radius:0!important;pointer-events:none!important;z-index:40}
+.nav::before,.nav::after{display:none!important}
+.nav-inner{pointer-events:auto!important;position:relative!important;display:flex!important;padding:6px!important;border-radius:999px!important;background:rgba(22,30,46,.82)!important;-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border:1px solid rgba(255,255,255,.12)!important;box-shadow:0 12px 32px rgba(0,0,0,.45)!important;overflow:hidden!important}
+.nav-pill{left:6px!important;top:6px!important;width:72px!important;height:56px!important;border-radius:999px!important}
+.nav-tab{width:72px!important;height:56px!important;border-radius:999px!important}
 </style>
 </body>
 </html>
